@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#define MAX_FGETS_COUNT 140 // There will be a problem if a shader line contains more characters than this
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
 {
@@ -54,34 +57,54 @@ typedef struct ShaderProgramSource
     char* FragmentSource;
 } ShaderProgramSource;
 
+/*const char* readFile(char* filepath) {
+	char* buffer = '\0';
+	long length;
+	FILE* f = fopen(filepath, "rb");
+
+	if (f != NULL) {
+		fseek(f, 0, SEEK_END); // Will fail with files of size > 4GB
+		length = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		buffer = malloc(length + 1);
+		if (buffer) {
+			fread(buffer, 1, length, f);
+		}
+		fclose(f);
+		buffer[length] = '\0';
+	}
+
+	return buffer;
+}*/
+
 static ShaderProgramSource ParseShader(const char* filepath)
 {
+    FILE* f = fopen(filepath, "rb");
+    // char* buffer = readFile(filepath);
     
-    // std::ifstream stream(filepath);
+    // Open stream using filepath
+    // 
 
-    // enum class ShaderType {
-    //     NONE = -1, VERTEX = 0, FRAGMENT = 1
-    // };
+    typedef enum ShaderType {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    } ShaderType;
 
-    // std::string line;
-    // std::stringstream ss[2];
-    // ShaderType type = ShaderType::NONE;
-    // while (getline(stream, line))
-    // {
-    //     if (line.find("#shader") != std::string::npos)
-    //     {
-    //         if (line.find("vertex") != std::string::npos)
-    //             type = ShaderType::VERTEX;
-    //         else if (line.find("fragment") != std::string::npos)
-    //             type = ShaderType::FRAGMENT;
-    //     }
-    //     else
-    //     {
-    //         ss[(int)type] << line << '\n';
-    //     }
-    // }
-    // return { ss[0].str(), ss[1].str() };
-    ShaderProgramSource out = { .VertexSource = "", .FragmentSource = "" };
+    char* line;
+    char* ss[2];
+    ShaderType type = NONE;
+    while (fgets(line, 120, f))
+    {
+        if(strncmp(line, "#shader ", 8)) {
+            if(strcmp(line, "#shader vertex")) {
+                type = VERTEX;
+            } else if(strcmp(line, "shader fragment")) {
+                type = FRAGMENT;
+            }
+        } else {
+            strcat(ss[(int)type], line); // Am I sure that this will keep the \n ?
+        }
+    }
+    ShaderProgramSource out = { .VertexSource = ss[0], .FragmentSource = ss[1] };
     return out;
 }
 
