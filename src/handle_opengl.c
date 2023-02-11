@@ -8,6 +8,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// Window size definition (should not be in this file)
+#define MONITOR_WIDTH 1920
+#define MONITOR_HEIGHT 1080
+
+// State (should not be in this file)
+bool fullscreen = false, just_pressed = false;
+int prev_width, prev_height, prev_x, prev_y;
+
 // Shaders
 unsigned int current_shader;
 
@@ -17,15 +25,16 @@ int location_time;
 
 // Windows
 GLFWwindow* window;
+int window_width, window_height;
 
 // Monitors
 GLFWmonitor* monitor;
 
-void set_fullscreen(bool fullscreen, int width, int height) {
-    glfwSetWindowMonitor(window, monitor, 0, 0, width, height, GLFW_DONT_CARE);
-}
-
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
+    //unused parameters are annoying
+    if(0) printf("%i", length);
+    if(0) printf("%p", userParam);
+
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
@@ -147,6 +156,9 @@ static unsigned int CreateShader(char* vertexShader, char* fragmentShader)
 }
 
 int init_GLFW(int width, int height, char* name) {
+    window_width = width;
+    window_height = height;
+
     /* Initialize the library */
     if (!glfwInit()) return -1;
 
@@ -154,7 +166,7 @@ int init_GLFW(int width, int height, char* name) {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(width, height, name, NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, name, NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -162,11 +174,13 @@ int init_GLFW(int width, int height, char* name) {
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    monitor = glfwGetPrimaryMonitor();
     glfwSwapInterval(1);
 
     if (GLEW_OK != glewInit()) {
         printf("glewInit failed, something is seriously wrong.\n");
     }
+
     return 0;
 }
 void init_Debug_Callback() {
@@ -215,11 +229,11 @@ void init_Shader(char* shader_filepath) {
     glUseProgram(current_shader);
 }
 
-void init_Uniforms(int width, int height) {
+void init_Uniforms() {
     /* Set initial uniform values */
     location_resolution = glGetUniformLocation(current_shader, "u_resolution");
     assert(location_resolution != -1);
-    glUniform2f(location_resolution, width, height);
+    glUniform2f(location_resolution, window_width, window_height);
     location_time = glGetUniformLocation(current_shader, "u_time");
     assert(location_time != -1);
     glUniform1f(location_time, glfwGetTime());
@@ -228,8 +242,19 @@ void init_Uniforms(int width, int height) {
 void take_user_input() {
     glfwPollEvents();
     if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        // Fullscreen
-    }
+        if(!just_pressed) {
+            fullscreen = !fullscreen;
+            just_pressed = true;
+            if(fullscreen) {
+                prev_width = window_width;
+                prev_height = window_height;
+                glfwGetWindowPos(window, &prev_x, &prev_y);
+                glfwSetWindowMonitor(window, monitor, 0, 0, MONITOR_WIDTH, MONITOR_HEIGHT, GLFW_DONT_CARE);
+            } else {
+                glfwSetWindowMonitor(window, NULL, prev_x, prev_y, prev_width, prev_height, GLFW_DONT_CARE);
+            }
+        }
+    } else just_pressed = false;
     if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         // Pause
     }
@@ -244,12 +269,14 @@ void take_user_input() {
     }
 }
 
-bool render_frame(int width, int height) {
+bool render_frame() {
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT);
     
     /* Update uniforms */
-    glUniform2f(location_resolution, width, height);
+    glfwGetWindowSize(window, &window_width, &window_height); //TODO Change to use callback function
+    glViewport(0, 0, window_width, window_height);
+    glUniform2f(location_resolution, window_width, window_height);
     glUniform1f(location_time, glfwGetTime());
 
     /* Draw the bound buffer With an index buffer SQUARE */
@@ -266,5 +293,6 @@ bool render_frame(int width, int height) {
 
 void clean_up() {
     glDeleteProgram(current_shader);
+    //TODO probably forgetting some stuff
     glfwTerminate();
 }

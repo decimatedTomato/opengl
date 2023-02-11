@@ -28,12 +28,12 @@ int main() {
     init_Quad();
 
     init_Shader(SHADER_FILE_PATH);
-    init_Uniforms(Window_Width, Window_Height);
+    init_Uniforms();
 
     /* Loop until the user closes the window */
     bool keep_running = true;
     while (keep_running) {
-        keep_running = render_frame(Window_Width, Window_Height);
+        keep_running = render_frame();
         take_user_input();
     }
     clean_up();
