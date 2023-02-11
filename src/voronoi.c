@@ -3,18 +3,27 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define DEFAULT_WINDOW_WIDTH 640
+#define DEFAULT_WINDOW_HEIGHT 480
+// #define SHADER_FILE_PATH "res/shaders/basic.shader"
+#define SHADER_FILE_PATH "res/shaders/voronoi.shader"
 
-#define MAX_FGETS_COUNT 140 // There will be a problem if a shader line contains more characters than this
+typedef enum DisplayMode { // As of yet unused
+    PAUSED, RENDERING
+} DisplayMode;
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
-{
+DisplayMode Current_Mode = RENDERING;
+int Window_Width = DEFAULT_WINDOW_WIDTH;
+int Window_Height = DEFAULT_WINDOW_HEIGHT;
+bool Is_Fullscreen = false;
+
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
@@ -54,8 +63,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
     printf("\n");
 }
 
-typedef struct ShaderProgramSource
-{
+typedef struct ShaderProgramSource {
     char* VertexSource;
     char* FragmentSource;
 } ShaderProgramSource;
@@ -80,53 +88,23 @@ char* readFile(const char* filepath) {
 	return buffer;
 }
 
-ShaderProgramSource ParseShader(const char* filepath) {
-    char* shader_contents = readFile(filepath);
-
-    typedef enum ShaderType {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    } ShaderType;
-
-    char* ss[2]; // OUTPUT STRINGS
-    ShaderType type = NONE; // SHADER READ MODE
-
-    char* marker_pos = shader_contents;
-    while((marker_pos = strstr(marker_pos, "#shader "))) {
-        // FIND MARKER
-        size_t marker_length = 0;
-        char* crawler = marker_pos;
-        while(*crawler != EOF && *crawler != '\n') {
-            crawler++;
-            marker_length++;
-        }
-        *crawler = '\0';
-        printf("%s\n", marker_pos);
-
-        // COPY INTO EXTERNAL STRING
-        if(!strcmp(marker_pos, "#shader vertex")) {
-            type = VERTEX;
-        } else if(!strcmp(marker_pos, "#shader fragment")) {
-            type = FRAGMENT;
-        } else {
-            printf("\nMarker:%s: not recognized", marker_pos);
+ShaderProgramSource ParseShader(char* source) {
+    ShaderProgramSource ss;
+    char *p = source;
+    while((p = strstr(p, "#shader "))) {
+        *p = '\0';
+        p += 8;
+        if(strncmp("vertex", p, 6) == 0) ss.VertexSource = p + 7;
+        else if(strncmp("fragment", p, 8) == 0) ss.FragmentSource = p + 9;
+        else {
+            printf("Shader type not recognized :%s:", p);
             exit(1);
         }
-        marker_pos = crawler + 1;
-
-        // Now save char* from marker_pos to EOF or to next marker
-        char* next_marker_offset = strstr(marker_pos, "#shader ");
-        size_t shader_length = (!next_marker_offset) ? strlen(marker_pos) : (size_t)marker_pos - (size_t)next_marker_offset;
-        printf("length:%llu", shader_length);
-        ss[type] = malloc(sizeof(char) * shader_length);
-        memcpy(ss[type], marker_pos, shader_length);
     }
-    free(shader_contents);
-    ShaderProgramSource out = { .VertexSource = ss[0], .FragmentSource = ss[1] };
-    return out;
+    return ss;
 }
 
-static unsigned int CompileShader(unsigned int type, const char* src)
-{
+static unsigned int CompileShader(unsigned int type, const char* src) {
     unsigned int id = glCreateShader(type);
     glShaderSource(id, 1, &src, NULL);
     glCompileShader(id);
@@ -166,6 +144,11 @@ static unsigned int CreateShader(char* vertexShader, char* fragmentShader)
     return program;
 }
 
+//TODO take user input 
+// void take_user_input() {
+//     if()
+// }
+
 int main() {
     GLFWwindow* window;
 
@@ -176,19 +159,17 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Voronoi", NULL, NULL);
-    if (!window)
-    {
+    window = glfwCreateWindow(Window_Width, Window_Height, "Voronoi", NULL, NULL);
+    if (!window) {
         glfwTerminate();
         return -1;
     }
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
-    if (GLEW_OK != glewInit())
-    {
-        /* Problem: glewInit failed, something is seriously wrong. */
+    if (GLEW_OK != glewInit()) {
         printf("glewInit failed, something is seriously wrong.\n");
     }
 
@@ -200,12 +181,6 @@ int main() {
 
     printf("%s\n", glGetString(GL_VERSION));
 
-    /* Best to initialize the triangles to be drawn outside of the game loop */
-    /*float triangle_positions[] = {
-        -0.5f, -0.5f,
-        0.0f, 0.5f,
-        0.5f, -0.5f
-    };*/
     float square_positions[] = {
         -1.0f, -1.0f,
          1.0f, -1.0f,
@@ -216,18 +191,8 @@ int main() {
         0, 1, 2,
         2, 3, 0
     };
-
-    // TRIANGLE
-   /* unsigned int triangle_buffer;
-    glGenBuffers(1, &triangle_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), triangle_positions, GL_STATIC_DRAW);
     
-    glVEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-    */
-    
-    // SQUARE
+    // Quad
     unsigned int square_buffer;
     glGenBuffers(1, &square_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, square_buffer);
@@ -241,19 +206,32 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_object);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), square_indices, GL_STATIC_DRAW);
 
-    ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
-    printf("VERTEX SHADER\n%s\n", source.VertexSource);
-    printf("FRAGMENT SHADER\n%s\n", source.FragmentSource);
+    char* shader_contents = readFile(SHADER_FILE_PATH);
+    ShaderProgramSource source = ParseShader(shader_contents);
+    // printf("VERTEX SHADER\n%s\n", source.VertexSource);
+    // printf("FRAGMENT SHADER\n%s\n", source.FragmentSource);
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    printf("\nREACHED\n\n");
+    free(shader_contents);
     glUseProgram(shader);
-    printf("\nREACHED\n\n");
+
+    /* Set initial uniform values */
+    
+    int location_resolution = glGetUniformLocation(shader, "u_resolution");
+    assert(location_resolution != -1);
+    glUniform2f(location_resolution, Window_Width, Window_Height);
+    int location_time = glGetUniformLocation(shader, "u_time");
+    assert(location_time != -1);
+    glUniform1f(location_time, glfwGetTime());
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+        
+        /* Update uniforms */
+        glUniform2f(location_resolution, Window_Width, Window_Height);
+        glUniform1f(location_time, glfwGetTime());
 
         /* Draw the bound buffer */
 
