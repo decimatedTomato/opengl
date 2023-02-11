@@ -34,9 +34,17 @@ void main()
    // Normalized pixel coordinates (from 0 to 1)
    vec2 coord = gl_FragCoord.xy / u_resolution.xy;
 
-   // Time varying pixel color
-   vec3 col = 0.5 + 0.5*cos(u_time + coord.xyx + vec3(0,2,4));
+   int closest_seed_index = 0;
+   float closest_distance = sqrt(u_resolution.x * u_resolution.y);
+   for(int seed = 0; seed < u_seed_count; seed++)
+   {
+      float seed_coord_distance = distance(coord, u_seed_pos[seed]);
+      if(seed_coord_distance < closest_distance) {
+         closest_distance = seed_coord_distance;
+         closest_seed_index = seed;
+      }
+   }
 
    // Output to screen
-   fragColor = vec4(col,1.0);
+   fragColor = u_seed_col[closest_seed_index];
 };
