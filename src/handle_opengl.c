@@ -4,6 +4,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "voronoi.h"
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -22,6 +24,10 @@ unsigned int current_shader;
 // Uniform locations
 int location_resolution;
 int location_time;
+int location_seed_count;
+int location_seed_positions;
+int location_seed_velocities;
+int location_seed_colors;
 
 // Windows
 GLFWwindow* window;
@@ -229,7 +235,7 @@ void init_Shader(char* shader_filepath) {
     glUseProgram(current_shader);
 }
 
-void init_Uniforms() {
+void init_Uniforms(const int seed_count, Seed seeds[]) {
     /* Set initial uniform values */
     location_resolution = glGetUniformLocation(current_shader, "u_resolution");
     assert(location_resolution != -1);
@@ -237,6 +243,37 @@ void init_Uniforms() {
     location_time = glGetUniformLocation(current_shader, "u_time");
     assert(location_time != -1);
     glUniform1f(location_time, glfwGetTime());
+
+    location_seed_count = glGetUniformLocation(current_shader, "u_seed_count");
+    // assert(location_seed_count != -1);
+    location_seed_positions = glGetUniformLocation(current_shader, "u_seed_pos");
+    // assert(location_seed_positions != -1);
+    location_seed_velocities = glGetUniformLocation(current_shader, "u_seed_vel");
+    // assert(location_seed_velocities != -1);
+    location_seed_colors = glGetUniformLocation(current_shader, "u_seed_col");
+    // assert(location_seed_colors != -1);
+    
+    GLfloat* positions = malloc(sizeof(Vector2) * seed_count);
+    GLfloat* velocities = malloc(sizeof(Vector2) * seed_count);
+    GLfloat* colors = malloc(sizeof(Vector4) * seed_count);
+    
+    for (int i = 0; i < seed_count; i++) {
+        positions[2 * i] = seeds[i].position.x;
+        positions[2 * i + 1] = seeds[i].position.y;
+        velocities[2 * i] = seeds[i].velocity.x;
+        velocities[2 * i + 1] = seeds[i].velocity.y;
+        colors[4 * i] = seeds[i].color.x;
+        colors[4 * i + 1] = seeds[i].color.y;
+        colors[4 * i + 2] = seeds[i].color.z;
+        colors[4 * i + 3] = seeds[i].color.w;
+    }
+    glUniform1i(location_seed_count, seed_count);
+    glUniform2fv(location_seed_positions, seed_count, positions);
+    glUniform2fv(location_seed_velocities, seed_count, velocities);
+    glUniform2fv(location_seed_colors, seed_count, colors);
+    free(positions);
+    free(velocities);
+    free(colors);
 }
 
 void take_user_input() {

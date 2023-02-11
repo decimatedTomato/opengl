@@ -11,12 +11,23 @@ void main()
 #shader fragment
 #version 330 core
 
+#define SEED_COUNT 3
+#define PI 3.14159265
+
+// My plan
+// Take in all of the seed values, loop through them, select the closest one and copy its colors
+
 in vec2 gl_FragCoord;
 out vec4 fragColor;
-// layout(location = 0) out vec4 color;
 
 uniform vec2 u_resolution;
 uniform float u_time;
+
+// Voronoi specific inputs
+uniform int u_seed_count;
+uniform vec2[3] u_seed_pos;
+uniform vec2[3] u_seed_vel;
+uniform vec4[3] u_seed_col;
 
 void main()
 {
