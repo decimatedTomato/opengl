@@ -225,6 +225,25 @@ void init_Uniforms(int width, int height) {
     glUniform1f(location_time, glfwGetTime());
 }
 
+void take_user_input() {
+    glfwPollEvents();
+    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        // Fullscreen
+    }
+    if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        // Pause
+    }
+    if(glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS) {
+        // Previous frame
+    }
+    if(glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS) {
+        // Next frame
+    }
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, 1);
+    }
+}
+
 bool render_frame(int width, int height) {
     /* Render here */
     glClear(GL_COLOR_BUFFER_BIT);
@@ -240,7 +259,8 @@ bool render_frame(int width, int height) {
     glfwSwapBuffers(window);
 
     /* Poll for and process events */
-    glfwPollEvents();
+    take_user_input();
+    
     return !glfwWindowShouldClose(window);
 }
 
