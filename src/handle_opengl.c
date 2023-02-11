@@ -18,6 +18,13 @@ int location_time;
 // Windows
 GLFWwindow* window;
 
+// Monitors
+GLFWmonitor* monitor;
+
+void set_fullscreen(bool fullscreen, int width, int height) {
+    glfwSetWindowMonitor(window, monitor, 0, 0, width, height, GLFW_DONT_CARE);
+}
+
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;

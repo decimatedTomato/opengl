@@ -24,15 +24,14 @@ void take_user_input() {
 }
 
 int main() {
-    if(init_GLFW(Window_Width, Window_Height, "Voronoi") == -1) {
-        printf("oopsie\n");
-        exit(1);
-    }
+    if(init_GLFW(Window_Width, Window_Height, "Voronoi") == -1) exit(1);
     init_Debug_Callback();
     init_Quad();
 
     init_Shader(SHADER_FILE_PATH);
     init_Uniforms(Window_Width, Window_Height);
+
+    set_fullscreen(true, Window_Width, Window_Height);
 
     /* Loop until the user closes the window */
     bool keep_running = true;
