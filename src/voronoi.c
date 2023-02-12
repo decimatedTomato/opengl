@@ -27,16 +27,14 @@ int window_height = DEFAULT_WINDOW_HEIGHT;
 bool is_fullscreen = false;
 
 // GENERATION
-float rand_float() {
-    return (float) rand() / RAND_MAX;
-}
+float rand_float() { return (float)rand() / ((float)RAND_MAX); }
 
 Seed seeds[SEED_COUNT];
 
 void generate_seeds() {
     for (size_t i = 0; i < SEED_COUNT; i++) {
-        seeds[i].position.x = rand_float() * SCREEN_WIDTH;
-        seeds[i].position.y = rand_float() * SCREEN_HEIGHT;
+        seeds[i].position.x = rand_float();
+        seeds[i].position.y = rand_float();
         seeds[i].velocity.x = rand_float() * MAX_VELOCITY;
         seeds[i].velocity.y = rand_float() * MAX_VELOCITY;
         seeds[i].color.x = rand_float();
@@ -44,6 +42,11 @@ void generate_seeds() {
         seeds[i].color.z = rand_float();
         seeds[i].color.w = 1;
     }
+}
+
+void refresh_seeds() {
+    generate_seeds();
+    update_seed_uniforms(SEED_COUNT, seeds);
 }
 
 int main() {
@@ -57,7 +60,8 @@ int main() {
     init_Quad();
 
     init_Shader(SHADER_FILE_PATH);
-    init_Uniforms(SEED_COUNT, seeds);
+    init_Uniforms(SEED_COUNT);
+    update_seed_uniforms(SEED_COUNT, seeds);
 
     /* Loop until the user closes the window */
     bool keep_running = true;

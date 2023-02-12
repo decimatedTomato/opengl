@@ -235,19 +235,21 @@ void init_Shader(char* shader_filepath) {
     glUseProgram(current_shader);
 }
 
-void init_Uniforms(const int seed_count, Seed seeds[]) {
+void init_Uniforms(const int seed_count) {
     /* Set initial uniform values */
     location_resolution = glGetUniformLocation(current_shader, "u_resolution");
-    assert(location_resolution != -1);
+    // assert(location_resolution != -1);
     glUniform2f(location_resolution, window_width, window_height);
     location_time = glGetUniformLocation(current_shader, "u_time");
     // assert(location_time != -1);
     glUniform1f(location_time, glfwGetTime());
 
     location_seed_count = glGetUniformLocation(current_shader, "u_seed_count");
-    assert(location_seed_count != -1);
-    glUniform1i(location_seed_count, seed_count);
+    // assert(location_seed_count != -1);
+    glUniform1i(location_seed_count, seed_count);    
+}
 
+void update_seed_uniforms(const int seed_count, Seed seeds[]) {
     location_seed_positions = glGetUniformLocation(current_shader, "u_seed_pos");
     // assert(location_seed_positions != -1);
     location_seed_velocities = glGetUniformLocation(current_shader, "u_seed_vel");
@@ -295,6 +297,9 @@ void take_user_input() {
     } else just_pressed = false;
     if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         // Pause
+    }
+    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        refresh_seeds();
     }
     if(glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS) {
         // Previous frame
