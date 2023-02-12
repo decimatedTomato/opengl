@@ -15,7 +15,7 @@
 #define MONITOR_HEIGHT 1080
 
 // State (should not be in this file)
-bool fullscreen = false, just_pressed = false;
+bool fullscreen = false, just_pressed = false, just_refreshed = false;
 int prev_width, prev_height, prev_x, prev_y;
 
 // Shaders
@@ -299,8 +299,11 @@ void take_user_input() {
         // Pause
     }
     if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        refresh_seeds();
-    }
+        if(!just_refreshed) {
+            refresh_seeds();
+            just_refreshed = true;
+        }
+    } else just_refreshed = false;
     if(glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS) {
         // Previous frame
     }

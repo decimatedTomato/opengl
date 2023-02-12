@@ -12,3 +12,5 @@ typedef struct Seed {
     Vector2 velocity;
     Vector4 color;
 } Seed;
+
+void refresh_seeds();
