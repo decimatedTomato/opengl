@@ -15,6 +15,7 @@ The purpose of this repository is to act as a basic setup for a project that wil
 - User input is handled awkwardly in general (many variables)
 - SEED_COUNT constant should be defined similarly in voronoi and shader code
 - The way that shaders are parsed prevents me from using a linter
+- Not sure if values are being read into the shader correctly but it doesn't really matter
 
 ### TODO
 - Fix issues if possible
