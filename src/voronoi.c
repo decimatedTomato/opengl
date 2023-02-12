@@ -13,7 +13,7 @@
 
 // USER DEFINITIONS
 #define SHADER_FILE_PATH "res/shaders/voronoi.shader"
-#define SEED_COUNT 3
+#define SEED_COUNT 6
 #define MAX_VELOCITY 5
 
 // DISPLAY
@@ -30,7 +30,6 @@ bool is_fullscreen = false;
 float rand_float() {
     return (float) rand() / RAND_MAX;
 }
-
 
 Seed seeds[SEED_COUNT];
 

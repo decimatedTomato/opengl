@@ -241,11 +241,13 @@ void init_Uniforms(const int seed_count, Seed seeds[]) {
     assert(location_resolution != -1);
     glUniform2f(location_resolution, window_width, window_height);
     location_time = glGetUniformLocation(current_shader, "u_time");
-    assert(location_time != -1);
+    // assert(location_time != -1);
     glUniform1f(location_time, glfwGetTime());
 
     location_seed_count = glGetUniformLocation(current_shader, "u_seed_count");
-    // assert(location_seed_count != -1);
+    assert(location_seed_count != -1);
+    glUniform1i(location_seed_count, seed_count);
+
     location_seed_positions = glGetUniformLocation(current_shader, "u_seed_pos");
     // assert(location_seed_positions != -1);
     location_seed_velocities = glGetUniformLocation(current_shader, "u_seed_vel");
@@ -267,10 +269,9 @@ void init_Uniforms(const int seed_count, Seed seeds[]) {
         colors[4 * i + 2] = seeds[i].color.z;
         colors[4 * i + 3] = seeds[i].color.w;
     }
-    glUniform1i(location_seed_count, seed_count);
     glUniform2fv(location_seed_positions, seed_count, positions);
     glUniform2fv(location_seed_velocities, seed_count, velocities);
-    glUniform2fv(location_seed_colors, seed_count, colors);
+    glUniform4fv(location_seed_colors, seed_count, colors);
     free(positions);
     free(velocities);
     free(colors);
