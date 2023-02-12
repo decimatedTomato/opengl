@@ -12,10 +12,8 @@ void main()
 #version 330 core
 
 #define SEED_COUNT 6
-#define PI 3.14159265
-
-// My plan
-// Take in all of the seed values, loop through them, select the closest one and copy its colors
+#define SEED_MARKER_RADIUS 6
+#define SEED_MARKER_COLOR vec4(0.1, 0.1, 0.1, 1.0)
 
 in vec4 gl_FragCoord;
 out vec4 fragColor;
@@ -32,19 +30,22 @@ uniform vec4[SEED_COUNT] u_seed_col;
 
 void main()
 {
-   vec2 coord = gl_FragCoord.xy / u_resolution;
+   bool in_seed = false;
+   // vec2 coord = gl_FragCoord.xy / u_resolution;
    
    int closest_seed_index = 0;
-   float maximum_distance = sqrt(u_resolution.x * u_resolution.y);
-   float closest_distance = maximum_distance;
-   for(int seed = 0; seed < u_seed_count; seed++)
-   {
-      float seed_coord_distance = distance(coord, u_seed_pos[seed] / maximum_distance);
+   float closest_distance = length(u_resolution);
+   for(int seed = 0; seed < u_seed_count; seed++) {
+      float seed_coord_distance = distance(gl_FragCoord.xy, u_seed_pos[seed] * u_resolution);
+      if(seed_coord_distance <= SEED_MARKER_RADIUS) {
+         in_seed = true;
+         break;
+      }
       if(seed_coord_distance < closest_distance) {
          closest_distance = seed_coord_distance;
          closest_seed_index = seed;
       }
    }
 
-   fragColor = u_seed_col[closest_seed_index];
+   (in_seed) ? fragColor = SEED_MARKER_COLOR : fragColor = u_seed_col[closest_seed_index];
 };
