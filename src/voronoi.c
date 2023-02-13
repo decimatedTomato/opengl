@@ -13,8 +13,8 @@
 
 // USER DEFINITIONS
 #define SHADER_FILE_PATH "res/shaders/voronoi.shader"
-#define SEED_COUNT 2
-#define MAX_VELOCITY 5
+#define SEED_COUNT 20
+#define MAX_VELOCITY 0.3
 
 // DISPLAY
 typedef enum DisplayMode { // As of yet unused
@@ -35,8 +35,8 @@ void generate_seeds() {
     for (size_t i = 0; i < SEED_COUNT; i++) {
         seeds[i].position.x = rand_float();
         seeds[i].position.y = rand_float();
-        seeds[i].velocity.x = rand_float() * MAX_VELOCITY;
-        seeds[i].velocity.y = rand_float() * MAX_VELOCITY;
+        seeds[i].velocity.x = rand_float() * MAX_VELOCITY * (2 * (rand() % 2) - 1);
+        seeds[i].velocity.y = rand_float() * MAX_VELOCITY * (2 * (rand() % 2) - 1);
         seeds[i].color.x = rand_float();
         seeds[i].color.y = rand_float();
         seeds[i].color.z = rand_float();
@@ -68,6 +68,7 @@ int main() {
     bool keep_running = true;
     while (keep_running) {
         keep_running = render_frame();
+        // refresh_seeds();
         take_user_input();
     }
     clean_up();
