@@ -13,7 +13,7 @@
 
 // USER DEFINITIONS
 // #define SHADER_FILE_PATH "res/shaders/voronoi.shader"
-#define SHADER_FILE_PATH "res/shaders/voronoi_bouncy.shader"
+#define SHADER_FILE_PATH "res/shaders/voronoi_manhattan.shader"
 #define SEED_COUNT 20
 #define MAX_VELOCITY 0.3
 
