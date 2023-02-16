@@ -11,8 +11,8 @@ void main()
 #shader fragment
 #version 330 core
 
-#define N 3
-#define SEED_COUNT 30
+#define N 5
+#define SEED_COUNT 10
 #define SEED_MARKER_RADIUS 6
 #define SEED_MARKER_COLOR vec4(0.1, 0.1, 0.1, 1.0)
 
@@ -39,33 +39,25 @@ vec2 calculate_seed_position(int seed) {
 }
 void main()
 {
-   fragColor = SEED_MARKER_COLOR;
-   bool in_seed = false;
    int nearest = min(N, u_seed_count);
    nearest = max(1, nearest);
    
    Neighbor neighbors[SEED_COUNT];
    for(int seed = 0; seed < u_seed_count; seed++) {
       float distance_from_pixel = distance(gl_FragCoord.xy, u_resolution * calculate_seed_position(seed));
-      if(distance_from_pixel <= SEED_MARKER_RADIUS) {
-         in_seed = true;
-         break;
-      }
       neighbors[seed] = Neighbor( seed, distance_from_pixel );
-   }
-   if(in_seed) {
-      return;
    }
 
    // Sort
    int min_distance_index;
-   for(int i = 0; i < SEED_COUNT - 1; i++) {
+   Neighbor temp;
+   for(int i = 0; i < nearest; i++) {
       min_distance_index = i;
       for(int j = i + 1; j < SEED_COUNT; j++)
          if(neighbors[j].distance_from_pixel < neighbors[min_distance_index].distance_from_pixel) {
             min_distance_index = j;
          }
-      Neighbor temp = neighbors[i];
+      temp = neighbors[i];
       neighbors[i] = neighbors[min_distance_index];
       neighbors[min_distance_index] = temp;
    }
