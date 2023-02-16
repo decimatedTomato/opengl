@@ -13,8 +13,8 @@
 
 // USER DEFINITIONS
 // #define SHADER_FILE_PATH "res/shaders/voronoi.shader"
-#define SHADER_FILE_PATH "res/shaders/voronoi_manhattan.shader"
-#define SEED_COUNT 20
+#define SHADER_FILE_PATH "res/shaders/nearest_x.shader"
+#define SEED_COUNT 30
 #define MAX_VELOCITY 0.3
 
 // DISPLAY
@@ -42,7 +42,7 @@ void generate_seeds() {
         seeds[i].color.y = rand_float();
         seeds[i].color.z = rand_float();
         seeds[i].color.w = 1;
-        printf("seed:%llu x:%.3f y:%.3f dx:%.3f dy:%.3f r:%.3f g:%.3f b:%.3f a:%.3f\n", i, seeds[i].position.x, seeds[i].position.y, seeds[i].velocity.x, seeds[i].velocity.y, seeds[i].color.x, seeds[i].color.y, seeds[i].color.z, seeds[i].color.w);
+        // printf("seed:%llu x:%.3f y:%.3f dx:%.3f dy:%.3f r:%.3f g:%.3f b:%.3f a:%.3f\n", i, seeds[i].position.x, seeds[i].position.y, seeds[i].velocity.x, seeds[i].velocity.y, seeds[i].color.x, seeds[i].color.y, seeds[i].color.z, seeds[i].color.w);
     }
 }
 

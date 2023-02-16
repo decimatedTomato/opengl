@@ -8,7 +8,7 @@ void main()
    gl_Position = position;
 };
 
-#shader fragment
+#shader fragment // What if you used the dot product instead of the distance of the seed and the pixel
 #version 330 core
 
 #define SEED_COUNT 20
