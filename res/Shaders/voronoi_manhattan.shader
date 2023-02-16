@@ -11,7 +11,7 @@ void main()
 #shader fragment
 #version 330 core
 
-#define SEED_COUNT 20
+#define SEED_COUNT 30
 #define SEED_MARKER_RADIUS 6
 #define SEED_MARKER_COLOR vec4(0.1, 0.1, 0.1, 1.0)
 

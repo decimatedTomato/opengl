@@ -11,7 +11,7 @@ void main()
 #shader fragment // What if you used the dot product instead of the distance of the seed and the pixel
 #version 330 core
 
-#define SEED_COUNT 20
+#define SEED_COUNT 30
 #define SEED_MARKER_RADIUS 6
 #define SEED_MARKER_COLOR vec4(0.1, 0.1, 0.1, 1.0)
 
