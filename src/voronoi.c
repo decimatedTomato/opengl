@@ -13,7 +13,7 @@
 
 // USER DEFINITIONS
 // #define SHADER_FILE_PATH "res/shaders/voronoi.shader"
-#define SHADER_FILE_PATH "res/shaders/nearest_n.shader"
+#define SHADER_FILE_PATH "res/shaders/nearest_n_overflow.shader"
 #define SEED_COUNT 10
 #define MAX_VELOCITY 0.3
 
